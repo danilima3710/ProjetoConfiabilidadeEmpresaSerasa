@@ -1,0 +1,59 @@
+package Model;
+
+import java.util.ArrayList;
+
+import org.junit.Test;
+import org.mockito.Mockito;
+
+public class EmpresaImportTest {
+
+	@Test
+	public void importarDadosEmpresasTest1() {
+		EmpresasDAOJSON empresasDAODJSON = Mockito.mock(EmpresasDAOJSON.class);
+		EmpresasDAOSQLite empresasDAOSQLite = Mockito.mock(EmpresasDAOSQLite.class);
+		
+		ArrayList<Empresa> arrayEmpresas = new ArrayList<Empresa>();
+		arrayEmpresas.add(criarEmpresa(1, "Teste1", 1, 1, 1));
+		arrayEmpresas.add(criarEmpresa(2, "Teste2", 2, 2, 2));
+		arrayEmpresas.add(criarEmpresa(3, "Teste3", 3, 3, 3));
+		
+		Mockito.doReturn(arrayEmpresas).when(empresasDAODJSON).getEmpresas();
+		Mockito.doReturn(null).when(empresasDAOSQLite).getEmpresa(Mockito.eq(1));
+		Mockito.doReturn(arrayEmpresas.get(1)).when(empresasDAOSQLite).getEmpresa(Mockito.eq(2));
+		Mockito.doReturn(arrayEmpresas.get(2)).when(empresasDAOSQLite).getEmpresa(Mockito.eq(3));
+		
+		EmpresaImport empresaImport = new EmpresaImport(empresasDAODJSON, empresasDAOSQLite);
+		empresaImport.importarDadosEmpresas("teste.json");
+		Mockito.verify(empresasDAOSQLite, Mockito.times(1)).alterar(Mockito.eq(arrayEmpresas.get(1)));
+		Mockito.verify(empresasDAOSQLite, Mockito.times(1)).alterar(Mockito.eq(arrayEmpresas.get(2)));
+	}
+	
+	@Test
+	public void importarDadosEmpresasTest2() {
+		EmpresasDAOJSON empresasDAODJSON = Mockito.mock(EmpresasDAOJSON.class);
+		EmpresasDAOSQLite empresasDAOSQLite = Mockito.mock(EmpresasDAOSQLite.class);
+		
+		ArrayList<Empresa> arrayEmpresas = new ArrayList<Empresa>();
+		arrayEmpresas.add(criarEmpresa(1, "Teste1", 1, 1, 1));
+		arrayEmpresas.add(criarEmpresa(2, "Teste2", 2, 2, 2));
+		arrayEmpresas.add(criarEmpresa(3, "Teste3", 3, 3, 3));
+		
+		Mockito.doReturn(arrayEmpresas).when(empresasDAODJSON).getEmpresas();
+		Mockito.doReturn(null).when(empresasDAOSQLite).getEmpresa(Mockito.eq(1));
+		Mockito.doReturn(null).when(empresasDAOSQLite).getEmpresa(Mockito.eq(2));
+		Mockito.doReturn(null).when(empresasDAOSQLite).getEmpresa(Mockito.eq(3));
+		
+		EmpresaImport empresaImport = new EmpresaImport(empresasDAODJSON, empresasDAOSQLite);
+		empresaImport.importarDadosEmpresas("teste.json");
+		Mockito.verify(empresasDAOSQLite, Mockito.times(0)).alterar(Mockito.any(Empresa.class));
+	}
+	
+	
+	
+	private Empresa criarEmpresa(int id, String nome, int qtdNotas, int qtdDebito, int score) {
+		Empresa empresa = new Empresa(id, nome, qtdNotas, qtdDebito, score);
+		return empresa;
+		
+	}
+
+}
